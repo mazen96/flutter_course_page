@@ -1,62 +1,37 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttercoursepage/core/models/course.dart';
-import 'core/services/course_api.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:fluttercoursepage/ui/views/home_view.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(
+      DevicePreview(
+        enabled: !kReleaseMode,
+        builder: (context) => MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('ar', ''), // Arabic, no country code
+      ],
+      builder: DevicePreview.appBuilder,
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          textTheme: Theme.of(context)
+              .textTheme
+              .apply(bodyColor: Colors.grey, fontFamily: 'Cairo')),
       home: Home(),
-    );
-  }
-}
-
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  CourseApi api = new CourseApi();
-  Course course;
-  bool busy = false;
-
-  void initCourse() async {
-    setState(() {
-      busy = true;
-    });
-    course = await api.getCourse();
-    setState(() {
-      busy = false;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initCourse();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: busy
-            ? Center(child: CircularProgressIndicator())
-            : Center(
-                child: Text(
-                  course.toString(),
-                  style: TextStyle(fontSize: 12.0),
-                ),
-              ),
-      ),
     );
   }
 }
