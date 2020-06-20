@@ -40,6 +40,10 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
+          Flexible(
+            flex: 1,
+            child: _buildReservationButton(),
+          )
         ],
       ),
     );
@@ -241,5 +245,32 @@ class _HomeState extends State<Home> {
 
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
+
+  Widget _buildReservationButton() {
+    return Container(
+      //padding: EdgeInsets.only(top: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: FlatButton(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.zero)),
+              onPressed: () {},
+              child: Text(
+                'قم بالحجز الاّن',
+                style: TextStyle(color: Colors.white),
+              ),
+              color: Colors.deepPurple,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////
 
 }
