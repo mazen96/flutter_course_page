@@ -1,5 +1,10 @@
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttercoursepage/core/models/course.dart';
+import 'package:fluttercoursepage/core/services/course_api.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -7,46 +12,75 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  /////////////////////////////////////////////
+  CourseApi api = new CourseApi();
+  Course course;
+  bool _isLoading = true;
+  IconData _favIconData = Icons.star_border;
+
+  void initCourse() async {
+    course = await api.getCourse();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initCourse();
+  }
+
+  /////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Flexible(
-            flex: 3,
-            child: _buildCarouselSection(),
-          ),
-          Flexible(
-            flex: 6,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  _buildCourseDetailsSection(),
-                  Divider(thickness: 1.0),
-                  _buildTrainerSection(),
-                  Divider(thickness: 1.0),
-                  _buildAboutCourseSection(),
-                  Divider(thickness: 1.0),
-                  _buildReservationTypesSection(),
-                ],
+    return _isLoading
+        ? Scaffold(
+            backgroundColor: Colors.deepPurple,
+            body: Center(
+              child: SpinKitPouringHourglass(
+                color: Colors.white,
               ),
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildReservationButton(),
           )
-        ],
-      ),
-    );
+        : Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: _buildAppBar(),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Flexible(
+                  flex: 3,
+                  child: _buildCarouselSection(),
+                ),
+                Flexible(
+                  flex: 6,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        _buildCourseDetailsSection(),
+                        Divider(thickness: 1.0),
+                        _buildTrainerSection(),
+                        Divider(thickness: 1.0),
+                        _buildAboutCourseSection(),
+                        Divider(thickness: 1.0),
+                        _buildReservationTypesSection(),
+                      ],
+                    ),
+                  ),
+                ),
+                Flexible(
+                  flex: 1,
+                  child: _buildReservationButton(),
+                )
+              ],
+            ),
+          );
   }
 
   ////////////////////////////////////////////////////////////
@@ -64,8 +98,15 @@ class _HomeState extends State<Home> {
           onPressed: () {},
         ),
         IconButton(
-          icon: Icon((Icons.star_border)),
-          onPressed: () {},
+          icon: Icon((_favIconData)),
+          onPressed: () {
+            setState(() {
+              _favIconData =
+                  _favIconData.codePoint == Icons.star_border.codePoint
+                      ? Icons.star
+                      : Icons.star_border;
+            });
+          },
         ),
       ],
       elevation: 0.0,
@@ -116,14 +157,17 @@ class _HomeState extends State<Home> {
   ///////////////////////////////////////////////////////////////
 
   Widget _buildCourseDetailsSection() {
+    DateTime localDateTime = course.date.toLocal();
+    var formatter = DateFormat('EEEE, dd LLLL, hh a', 'ar');
+    String formattedDate = formatter.format(localDateTime);
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('# رياضة'),
+          Text('# ${course.interest}'),
           Text(
-            'الاسم الكامل للدورة بشكل افتراضي من اجل اظهار شكل التصميم',
+            course.title,
             style: Theme.of(context)
                 .textTheme
                 .headline6
@@ -137,7 +181,7 @@ class _HomeState extends State<Home> {
                 size: 15.0,
               ),
               SizedBox(width: 10.0),
-              Text('الاربعاء 19 نيسان 7 مساءاً')
+              Text(formattedDate)
             ],
           ),
           SizedBox(height: 5.0),
@@ -148,7 +192,7 @@ class _HomeState extends State<Home> {
                 size: 15.0,
               ),
               SizedBox(width: 10.0),
-              Text('عنوان الدورة او الحدث بشكل كامل')
+              Text(course.address)
             ],
           ),
         ],
@@ -170,12 +214,12 @@ class _HomeState extends State<Home> {
               CircleAvatar(
                 radius: 15.0,
                 backgroundImage: NetworkImage(
-                  "http://skillzycp.com/upload/trainer/389_BaseImage_636896408382239890.jpg",
+                  course.trainerImg,
                 ),
                 backgroundColor: Colors.transparent,
               ),
               SizedBox(width: 10.0),
-              Text('اسم المدرب',
+              Text(course.trainerName,
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
@@ -183,8 +227,7 @@ class _HomeState extends State<Home> {
             ],
           ),
           SizedBox(height: 5.0),
-          Text(
-              'هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربى'),
+          Text(course.trainerInfo),
         ],
       ),
     );
@@ -207,8 +250,7 @@ class _HomeState extends State<Home> {
                 .apply(fontWeightDelta: 50),
           ),
           SizedBox(height: 5.0),
-          Text(
-              'هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربى، حيث يمكنك أن تولد مثل هذا النص أو العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التى يولدها التطبيق.')
+          Text(course.occasionDetail),
         ],
       ),
     );
@@ -230,16 +272,27 @@ class _HomeState extends State<Home> {
                 .subtitle1
                 .apply(fontWeightDelta: 50),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[Text('الحجز العادي'), Text('40 SAR')],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[Text('الحجز المميز'), Text('120 SAR')],
-          ),
+          _buildAllReservTypes(),
         ],
       ),
+    );
+  }
+
+  Widget _buildAllReservTypes() {
+    List<Widget> reservTypesRows = new List<Widget>();
+
+    for (int i = 0; i < course.reservTypes.length; i++) {
+      Widget newRow = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(course.reservTypes[i].name),
+          Text('${course.reservTypes[i].price} SAR')
+        ],
+      );
+      reservTypesRows.add(newRow);
+    }
+    return Column(
+      children: reservTypesRows,
     );
   }
 
@@ -260,7 +313,10 @@ class _HomeState extends State<Home> {
               onPressed: () {},
               child: Text(
                 'قم بالحجز الاّن',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold),
               ),
               color: Colors.deepPurple,
             ),

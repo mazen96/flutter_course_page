@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttercoursepage/ui/views/home_view.dart';
 
-void main() => runApp(
-      DevicePreview(
-        enabled: !kReleaseMode,
-        builder: (context) => MyApp(),
-      ),
-    );
+//void main() => runApp(
+//      DevicePreview(
+//        enabled: !kReleaseMode,
+//        builder: (context) => MyApp(),
+//      ),
+//    );
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('ar', ''), // Arabic, no country code
       ],
-      builder: DevicePreview.appBuilder,
+      //builder: DevicePreview.appBuilder,
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
