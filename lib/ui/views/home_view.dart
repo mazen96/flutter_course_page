@@ -1,9 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttercoursepage/core/models/course.dart';
 import 'package:fluttercoursepage/core/services/course_api.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
                   flex: 3,
                   child: _buildCarouselSection(),
                 ),
-                Flexible(
+                Expanded(
                   flex: 6,
                   child: SingleChildScrollView(
                     child: Column(
@@ -118,6 +118,25 @@ class _HomeState extends State<Home> {
   /////////////////////////////////////////////////////////
 
   Widget _buildCarouselSection() {
+    List<CachedNetworkImage> carouselImagesList =
+        new List<CachedNetworkImage>();
+    for (int i = 0; i < course.img.length; i++) {
+      CachedNetworkImage cachedNetworkImage = new CachedNetworkImage(
+        imageUrl: course.img[i],
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        placeholder: (context, url) =>
+            new Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => Center(child: Icon(Icons.error)),
+      );
+      carouselImagesList.add(cachedNetworkImage);
+    }
     return Container(
       child: Column(
         children: <Widget>[
@@ -129,20 +148,12 @@ class _HomeState extends State<Home> {
                   width: 300.0,
                   child: Carousel(
                     dotSize: 5.0,
+                    dotSpacing: 15.0,
                     dotPosition: DotPosition.bottomLeft,
                     dotBgColor: Colors.transparent,
                     indicatorBgPadding: 10.0,
                     autoplay: true,
-                    images: [
-                      NetworkImage(
-                          'http://skillzycp.com/upload/business/389_636896432064799384.jpg'),
-                      NetworkImage(
-                          'http://skillzycp.com/upload/business/389_636896432315268827.jpg'),
-                      NetworkImage(
-                          'http://skillzycp.com/upload/business/389_636896432445581923.jpg'),
-                      NetworkImage(
-                          'http://skillzycp.com/upload/business/389_636896432574644899.jpg')
-                    ],
+                    images: carouselImagesList,
                   ),
                 ),
               ),
@@ -204,6 +215,11 @@ class _HomeState extends State<Home> {
   /////////////////////////////////////////////////////
 
   Widget _buildTrainerSection() {
+    ///////////////////////////////////////////////////////////////////////////
+    /// I removed the 's' in the https protocol so I can request on a protected
+    /// asset.
+    String trainerImgSrc = course.trainerImg.replaceFirst(new RegExp(r's'), '');
+    //////////////////////////////////////////////////////////////////////////
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Column(
@@ -213,9 +229,7 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               CircleAvatar(
                 radius: 15.0,
-                backgroundImage: NetworkImage(
-                  course.trainerImg,
-                ),
+                backgroundImage: CachedNetworkImageProvider(trainerImgSrc),
                 backgroundColor: Colors.transparent,
               ),
               SizedBox(width: 10.0),

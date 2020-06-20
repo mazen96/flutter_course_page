@@ -10,7 +10,6 @@ import 'package:fluttercoursepage/ui/views/home_view.dart';
 //        builder: (context) => MyApp(),
 //      ),
 //    );
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
